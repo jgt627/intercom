@@ -11,17 +11,14 @@ class Intercom_buffer(Intercom):
 
     def init(self, args):
         Intercom.init(self, args)
-        self.ce = 0
-        self.cl = -1
+        self.cl = 0
+        self.ce = 1
         self.l = [None]*64
-        self.g = 0
     def run(self):
         sending_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         receiving_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         listening_endpoint = ("0.0.0.0", self.listening_port)
         receiving_sock.bind(listening_endpoint)
-
-        q = queue.Queue(maxsize=100000)
 
         def receive_and_buffer():
             estructura, source_address = receiving_sock.recvfrom(Intercom.max_packet_size)
@@ -35,10 +32,10 @@ class Intercom_buffer(Intercom):
                 a.append(numpy.asarray(tuplaux))
             b = numpy.asarray(a)
             
+            
             self.ce += 1
             self.ce %= 64
             self.l[cont] = b
-            self.g = b
         def record_send_and_play(indata, outdata, frames, time, status):
             
             
