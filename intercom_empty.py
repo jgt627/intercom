@@ -44,6 +44,23 @@ class Intercom_empty(Intercom_DFC):
             message = struct.pack(self.packet_format, self.ignored_bps, self.recorded_chunk_number, bitplane_number, self.received_bitplanes_per_chunk[(self.played_chunk_number+1) % self.cells_in_buffer]+1, *bitplane)
             self.sending_sock.sendto(message, (self.destination_IP_addr, self.destination_port))
             self.ignored_bps = 0
+
+    def send(self, indata):
+        signs = indata & 0x8000
+        magnitudes = abs(indata)
+        indata = signs | magnitudes
+        
+        self.NOBPTS = int(0.75*self.NOBPTS + 0.25*self.NORB)
+        self.NOBPTS += 1
+        if self.NOBPTS > self.max_NOBPTS:
+            self.NOBPTS = self.max_NOBPTS
+        last_BPTS = self.max_NOBPTS - self.NOBPTS - 1
+        self.send_bitplane(indata, self.max_NOBPTS-1)
+        self.send_bitplane(indata, self.max_NOBPTS-2)
+        for bitplane_number in range(self.max_NOBPTS-3, last_BPTS + 1, -1):
+            self.send_bitplane(indata, bitplane_number)
+        self.send_bitplane(indata, last_BPTS)
+        self.recorded_chunk_number = (self.recorded_chunk_number + 1) % self.MAX_CHUNK_NUMBER
     
 
 if __name__ == "__main__":
