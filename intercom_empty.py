@@ -34,9 +34,9 @@ class Intercom_empty(Intercom_DFC):
         self.received_bitplanes_per_chunk[received_chunk_number % self.cells_in_buffer] += 1 + ig_bps
         return received_chunk_number
     
-    def send_bitplane(self, indata, bitplane_number):        
+    def send_bitplane(self, indata, bitplane_number, last_BPTS):        
         bitplane = (indata[:, bitplane_number%self.number_of_channels] >> bitplane_number//self.number_of_channels) & 1
-        if not np.any(bitplane):
+        if not np.any(bitplane) and bitplane_number != last_BPTS:
             self.ignored_bps += 1
         else:
             bitplane = bitplane.astype(np.uint8)
@@ -57,9 +57,8 @@ class Intercom_empty(Intercom_DFC):
         last_BPTS = self.max_NOBPTS - self.NOBPTS - 1
         self.send_bitplane(indata, self.max_NOBPTS-1)
         self.send_bitplane(indata, self.max_NOBPTS-2)
-        for bitplane_number in range(self.max_NOBPTS-3, last_BPTS + 1, -1):
-            self.send_bitplane(indata, bitplane_number)
-        self.send_bitplane(indata, last_BPTS)
+        for bitplane_number in range(self.max_NOBPTS-3, last_BPTS, -1):
+            self.send_bitplane(indata, bitplane_number, last_BPTS)
         self.recorded_chunk_number = (self.recorded_chunk_number + 1) % self.MAX_CHUNK_NUMBER
     
 
