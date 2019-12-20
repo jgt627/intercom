@@ -55,8 +55,8 @@ class Intercom_empty(Intercom_DFC):
         if self.NOBPTS > self.max_NOBPTS:
             self.NOBPTS = self.max_NOBPTS
         last_BPTS = self.max_NOBPTS - self.NOBPTS - 1
-        self.send_bitplane(indata, self.max_NOBPTS-1)
-        self.send_bitplane(indata, self.max_NOBPTS-2)
+        self.send_bitplane(indata, self.max_NOBPTS-1, last_BPTS)
+        self.send_bitplane(indata, self.max_NOBPTS-2, last_BPTS)
         for bitplane_number in range(self.max_NOBPTS-3, last_BPTS, -1):
             self.send_bitplane(indata, bitplane_number, last_BPTS)
         self.recorded_chunk_number = (self.recorded_chunk_number + 1) % self.MAX_CHUNK_NUMBER
